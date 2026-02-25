@@ -1,0 +1,91 @@
+from machine import Pin
+import time
+import neopixel
+
+
+pb1 = Pin(14, Pin.IN, Pin.PULL_UP) 
+pb2 = Pin(19, Pin.IN, Pin.PULL_UP)
+
+buzzer = Pin(25, Pin.OUT)
+
+
+raju = neopixel.NeoPixel(Pin(23), 16)
+
+
+board = [0,0,0,0,0,0,0,0,0]
+
+
+wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+
+current_square = 0
+current_player = 1
+game_over = False
+
+while True:
+
+    if not game_over:
+
+        
+        for i in range(16):
+            raju[i] = (0,0,0)
+
+        
+        for i in range(9):
+            if board[i] == 1:
+                raju[i] = (255,0,0)   
+            if board[i] == 2:
+                raju[i] = (0,0,255)   
+
+        
+        if board[current_square] == 0:
+            raju[current_square] = (0,255,0)
+
+        raju.write()
+        time.sleep(0.2)
+
+        
+        if pb1.value() == 0:
+            print(pb1.value())
+            current_square += 1
+            if current_square > 8:
+                current_square = 0
+            time.sleep(0.3)
+
+        
+        if pb2.value() == 0:
+            if board[current_square] == 0:
+
+                board[current_square] = current_player
+
+                
+                if current_player == 1:
+                    current_player = 2
+                else:
+                    current_player = 1
+
+               
+                for w in wins:
+                    if (board[w[0]] != 0 and
+                        board[w[0]] == board[w[1]] == board[w[2]]):
+                        game_over = True
+
+                
+                if 0 not in board:
+                    game_over = True
+
+            time.sleep(0.3)
+
+    else:
+        
+        buzzer.value(1)
+        time.sleep(4)
+        buzzer.value(0)
+
+        
+        colors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(255,0,255),(0,255,255)]
+
+        for c in colors:
+            for i in range(9):
+                raju[i] = c
+            raju.write()
+            time.sleep(0.3)
